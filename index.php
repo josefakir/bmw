@@ -1,67 +1,29 @@
-<!doctype>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+	<meta charset="UTF-8">
+	<title>BMW Datos oportunidad</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
+
 </head>
 <body>
-
-<?php
-include("vendor/autoload.php");
-use OntraportAPI\Ontraport;
-
-
-$client = new Ontraport("2_165242_leJiCRh3x","OUnU0EmLXURF0kY");
-
-//1 : quitar los que no tienen correo
-//2 : revisar que exista el contacto en ontraport, si existe, insertar oportunidad, si no existe continuar
-//$tmpfname = "Workbook1.xlsx";
-$tmpfname = "DatosOportunidad.xlsx";
-$excelReader = PHPExcel_IOFactory::createReaderForFile($tmpfname);
-$excelObj = $excelReader->load($tmpfname);
-$worksheet = $excelObj->getSheet(0);
-$lastRow = $worksheet->getHighestRow();
-$i = 1;
-$countrequests = 0;
-for ($row =7; $row <= $lastRow; $row++) {
-	if($worksheet->getCell('J'.$row)->getValue()!=''){
-		echo "Línea ".$i." procesada";
-		echo "\n";
-		$i++;
-		/* buscar en contacto */
-		$requestParams = array(
-		    "listFields" => "id,firstname,lastname,email",
-		    "search" => $worksheet->getCell('J'.$row)->getValue()
-		);
-		$response = json_decode($client->contact()->retrieveMultiple($requestParams));
-		$countrequests ++;
-		$data = $response->data;
-		if(!empty($data)){
-			/* se encontró insertar oportunidad */
-			$requestParams = array(
-			    "objectID"  => 10000, // Object type ID: 0
-			    "f1501" => $data[0]->id,
-				//"f1510" => "",  ///descripcion sig. tarea
-				//"f1511" => "",  ///Fase ciclo de ventas
-				//"f1512" => "",  ///Solicitud de Lead
-				//"f1508" => "",  ///Código Resultado
-				//"f1507" => "",  ///Estado de proceso de lead 
-				"f1503" => $worksheet->getCell('D'.$row)->getValue(),
-				//"f1509" => "",   //Descripción
-				"f1506" => $worksheet->getCell('F'.$row)->getValue(),
-				"f1505" => $worksheet->getCell('E'.$row)->getValue(),
-				"f1504" => $worksheet->getCell('B'.$row)->getValue(),
-				"f1502" => $worksheet->getCell('A'.$row)->getValue(),
-				"f1518" => $worksheet->getCell('G'.$row)->getValue(),
-				"f1519" => $worksheet->getCell('H'.$row)->getValue(),
-				"f1520" => $worksheet->getCell('C'.$row)->getValue()
-			);
-			$response = $client->object()->create($requestParams);
-			$countrequests ++;
-		}
-	}	 
-}
-echo $countrequests;
-?>
-
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<img src="img/logobmw.png" alt="" style="width: 200px; margin: 0 auto; display: block">
+			</div>
+			<div class="col-md-12">
+				<form method="post" action="procesar.php" enctype="multipart/form-data">
+					<div class="form-group">
+						<label style="color: #008000"><i class="fas fa-file-excel" ></i> Archivo Xls</label>
+						<input type="file" name="archivo" class="form-control" >
+					</div>
+					<button type="submit" class="btn btn-primary">Importar datos</button>
+				</form>
+			</div>
+		</div>
+	</div>
 </body>
-
-
+</html>
